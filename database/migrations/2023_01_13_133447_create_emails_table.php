@@ -15,6 +15,11 @@ return new class extends Migration
     {
         Schema::create('emails', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id');
+            $table->string('email')->unique();
+            $table->boolean('primary');
+            $table->string('token');
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });
     }
