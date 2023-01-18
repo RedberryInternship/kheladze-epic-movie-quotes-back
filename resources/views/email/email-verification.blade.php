@@ -76,23 +76,53 @@
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 </head>
 
-<body>
+<body style="
+            background-color: #171717;
+            padding-left: 194px;
+            padding-right: 194px;
+            color:white;">
     
-        <div class="header">
-            <img src="{{ asset('images/quote.png') }}" />
-            <h1>Movie quotes</h1>
+        <div class="display: block; 
+            text-align: center; 
+            margin: auto;
+            margin-top:77px;
+            color:white;" class="header">
+            <img style="margin: auto;
+            margin-top:9px;" src="{{ asset('images/quote.png') }}" />
+            <h1 style=" display: block; 
+            text-align: center; 
+            font-size: 12px;
+            line-height: 28px;
+            color: #DDCCAA;">Movie quotes</h1>
         </div>
-        <p class="hola">Hola {{$name}}</p>
+        <p style="margin-top:72px;
+            margin-bottom:24px;" class="hola">Hola {{$name}}</p>
         <p style="display: block; text-align: left;">
         Thanks for joining Movie quotes! We really appreciate it. Please click the button below to verify your account:
         </p>
-        <a class="button"
+        <a style="display: inline-block;
+            text-align: center;
+            background-color: #E31221;
+            width: 128px;
+            height:38px;
+            margin: auto;
+            padding-top: 12px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top:32px;
+            margin-bottom:40px;
+            color:white;" class="button"
             href="{{ route('email.verify', ['token' => $token]) }}"
             >VERIFY EMAIL
         </a>
-        <p class="if">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
-        <a class="link" href="{{ route('email.verify', ['token' => $token]) }}">{{ route('email.verify', ['token' => $token]) }}</a>
-        <p class="questions">If you have any problems, please contact us: support@moviequotes.ge</p>
+        <p style="margin-bottom:24px;" class="if">If clicking doesn't work, you can try copying and pasting it to your browser:</p>
+        <a style=" word-break: break-all;
+            white-space: normal;      
+            color:#DDCCAA;
+            text-decoration:none;
+            width:40%;" class="link" href="{{ route('email.verify', ['token' => $token]) }}">{{ route('email.verify', ['token' => $token]) }}</a>
+        <p style="margin-top:40px;
+            margin-bottom:24px;" class="questions">If you have any problems, please contact us: support@moviequotes.ge</p>
         <p>MovieQuotes Crew</p>
     
 </body>

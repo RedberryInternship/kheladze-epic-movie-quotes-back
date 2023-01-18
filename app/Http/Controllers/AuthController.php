@@ -99,6 +99,6 @@ class AuthController extends Controller
             $email->save();
         }
 
-        return redirect('http://localhost:3000/');
+        return redirect(env('MAIL_TO_URL'));
     }
 }
