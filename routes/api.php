@@ -19,13 +19,13 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/email/verify/{token}', [AuthController::class, 'verifyAccount'])->name('email.verify');
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/me', [AuthController::class, 'me']);
-    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 

@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Facade;
 
 return [
 
+    'url' => env('MAIL_TO_URL', 'http://localhost:3000/'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
