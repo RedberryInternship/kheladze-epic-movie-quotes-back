@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,20 +17,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify/{token}', [AuthController::class, 'verifyAccount'])->name('email.verify');
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/email/create', [UserController::class, 'addEmail']);
+    Route::post('/email/delete', [UserController::class, 'deleteEmail']);
+    Route::post('/email/make-primary', [UserController::class, 'makePrimary']);
+    Route::post('/username/change', [UserController::class, 'changeUsername']);
+    Route::post('/password/change', [UserController::class, 'changePassword']);
 });
 
-
-
-
-// Route::get('/login', [AuthController::class, "login"]);
+Route::get('/google/auth', [AuthController::class, 'redirectToGoogle']);
+Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
