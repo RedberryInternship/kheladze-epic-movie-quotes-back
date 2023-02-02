@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->string('email')->unique();
-            $table->boolean('primary');
-            $table->string('token');
+            $table->boolean('primary')->nullable();
+            $table->string('token')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });

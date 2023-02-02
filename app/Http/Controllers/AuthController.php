@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 
 class AuthController extends Controller
@@ -29,6 +30,9 @@ class AuthController extends Controller
             if (!$email) {
                 throw $error;
             } elseif ($email) {
+                if (!$email->email_verified_at) {
+                    throw ValidationException::withMessages(['email' => __('auth.email')]);
+                }
                 if (!Hash::check($attributes['password'], $email->users->password)) {
                     throw $error;
                 }
@@ -42,14 +46,20 @@ class AuthController extends Controller
         }
 
         $user = $name_email == 'email' ? User::where('id', $email->user_id)->with(['emails'])->first() : User::where('name', $request['email'])->with(['emails'])->first();
+        if (!$user->emails->where('email_verified_at', '<>', null)->first()) {
+            throw ValidationException::withMessages(['email' => __('auth.email')]);
+        }
 
-        session()->regenerate();
+        request()->session()->regenerate();
 
-        return response()->json([
-            'message' => "Success",
-            'user' => $user,
-            'token' => $user->createToken('API Token for ' . $user['name'])->plainTextToken
-        ]);
+        Auth::login($user);
+        return response(['user' => auth()->user()]);
+    }
+    public function me()
+    {
+        $user = Auth::user();
+        $withEmail = User::where('id', $user->id)->with(['emails'])->first();
+        return response(['user' => $withEmail]);
     }
 
     public function register(StoreUserRequest $request)
@@ -77,16 +87,14 @@ class AuthController extends Controller
             'message' => "Success",
             'code' => 201,
             'user' => $user,
-            'token' => $user->createToken('API Token for ' . $user['name'])->plainTextToken,
         ]);
     }
 
     public function logout()
     {
-        $user = Auth::user();
-        $user->tokens()->delete();
+        request()->session()->invalidate();
         return response()->json([
-            'message' => 'You successfully logged out, your token has been deleted'
+            'message' => 'You successfully logged out'
         ]);
     }
 
@@ -100,5 +108,47 @@ class AuthController extends Controller
         }
 
         return redirect(env('MAIL_TO_URL'));
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        $google_user = Socialite::with('google')->stateless()->user();
+
+        $user = User::where('google_id', $google_user->getId())->first();
+        if (!$user) {
+            $emailAlreadyExists = Email::where('email', $google_user->getEmail())->first();
+            if ($emailAlreadyExists) {
+                return response()->json([
+                    'message' => "email already exists",
+                    'code' => 422,
+                ]);
+            }
+            $new_user = User::create([
+                "name" => $google_user->getName(),
+                'google_id' => $google_user->getId()
+            ]);
+            $email = Email::create([
+                "email" => $google_user->getEmail(),
+                'user_id' => $new_user->id,
+            ]);
+
+            request()->session()->regenerate();
+            Auth::login($new_user);
+            return redirect(env('FRONTEND_URL'));
+        } else {
+
+            request()->session()->regenerate();
+            Auth::login($user);
+            return redirect(env('FRONTEND_URL'));
+        }
+        try {
+        } catch (\Throwable $th) {
+            return $th;
+        }
     }
 }

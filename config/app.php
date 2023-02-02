@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Facade;
 
 return [
 
-    'url' => env('MAIL_TO_URL', 'http://localhost:3000/'),
+    'url' => env('MAIL_TO_URL', 'http://127.0.0.1:3000/?account_activated=1'),
 
+    'front' => env('FRONTEND_URL', 'http://localhost:3000/news-feed'),
     /*
     |--------------------------------------------------------------------------
     | Application Name
