@@ -4,8 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Movie extends Model
 {
     use HasFactory;
+
+    use HasTranslations;
+
+    public $translatable = [
+        'name',
+        'director',
+        'description'
+    ];
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'genres',
+        'director',
+        'budget',
+        'year',
+        'description',
+        'image'
+    ];
+
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
+    public function users()
+    {
+        return $this->hasOne(User::class);
+    }
 }

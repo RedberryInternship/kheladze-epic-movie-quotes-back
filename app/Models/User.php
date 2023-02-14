@@ -26,4 +26,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Email::class);
     }
+    public function movies()
+    {
+        return $this->hasMany(Movie::class);
+    }
 }

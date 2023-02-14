@@ -66,4 +66,14 @@ class UserController extends Controller
             'message' => 'You successfully updated password',
         ]);
     }
+    public function uploadImage(Request $request)
+    {
+        $path = request()->file('image')->store('users');
+        $user = User::where('id', $request['userId'])->first();
+
+        $user->image = "http://127.0.0.1:8000/storage/" . $path;
+        $user->save();
+
+        return $user;
+    }
 }

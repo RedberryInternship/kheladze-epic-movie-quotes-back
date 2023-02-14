@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MovieController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -21,7 +23,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify/{token}', [AuthController::class, 'verifyAccount'])->name('email.verify');
 
-
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -30,6 +31,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/email/make-primary', [UserController::class, 'makePrimary']);
     Route::post('/username/change', [UserController::class, 'changeUsername']);
     Route::post('/password/change', [UserController::class, 'changePassword']);
+    Route::post('/upload/image', [UserController::class, 'uploadImage']);
+    Route::get('/genres', [MovieController::class, 'genres']);
+    Route::post('/movie/create', [MovieController::class, 'createMovie']);
+    Route::get('/movie', [MovieController::class, 'allMovies']);
+    Route::post('/movie/update', [MovieController::class, 'updateMovie']);
+    Route::post('/movie/delete', [MovieController::class, 'deleteMovie']);
+    Route::post('/quote/create', [QuoteController::class, 'createQuote']);
+    Route::post('/quote/update', [QuoteController::class, 'updateQuote']);
+    Route::post('/quote/delete', [QuoteController::class, 'deleteQuote']);
 });
 
 Route::get('/google/auth', [AuthController::class, 'redirectToGoogle']);
