@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -59,6 +60,7 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $withEmail = User::where('id', $user->id)->with(['emails'])->first();
+        $withEmail->image = Storage::url($withEmail->image);
         return response(['user' => $withEmail]);
     }
 
