@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Quote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class QuoteController extends Controller
 {
@@ -13,11 +15,10 @@ class QuoteController extends Controller
         Quote::create([
             'movie_id' => $request['movieId'],
             'quote' => ['en' => $request['quote_en'], 'ka' => $request['quote_ka']],
-            'image' => env('STORAGE_PATH') . $path
+            'image' => $path
         ]);
-
         return response()->json([
-            'message' => 'Quote added successfully'
+            'message' => 'Quote added successfully',
         ]);
     }
     public function updateQuote(Request $request)
@@ -25,9 +26,9 @@ class QuoteController extends Controller
         $image = request()->file('image');
         if ($image) {
             $path = $image->store('quote');
-            $image = env('STORAGE_PATH') . $path;
+            $image = $path;
         } else {
-            $image = $request['image'];
+            $image = Str::remove(env('STORAGE_PATH'), $request['image']);
         }
         $quote = Quote::where('id', $request['quoteId'])->first();
 

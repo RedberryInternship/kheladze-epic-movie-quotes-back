@@ -71,7 +71,7 @@ class UserController extends Controller
         $path = request()->file('image')->store('users');
         $user = User::where('id', $request['userId'])->first();
 
-        $user->image = "http://127.0.0.1:8000/storage/" . $path;
+        $user->image = $path;
         $user->save();
 
         return $user;

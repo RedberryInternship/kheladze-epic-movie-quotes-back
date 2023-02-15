@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MovieController extends Controller
 {
@@ -19,7 +21,7 @@ class MovieController extends Controller
             'budget' => $request['budget'],
             'year' => $request['year'],
             'description' => ['en' => $request['description_en'], 'ka' => $request['description_ka']],
-            'image' => "http://127.0.0.1:8000/storage/" . $path
+            'image' => $path
         ]);
 
         return response()->json([
@@ -29,8 +31,21 @@ class MovieController extends Controller
 
     public function allMovies()
     {
-        return response()->json(Movie::with('quotes')->get());
+        $moviesWithQuotes = Movie::with('quotes')->get();
+        $modifiedCollection = $moviesWithQuotes->map(function ($movie) {
+            $movie->image = Storage::url($movie->image);
+
+            $quotes = $movie->quotes->map(function ($quote) {
+                $quote->image = Storage::url($quote->image);;
+                return $quote;
+            });
+
+            $movie->quotes = $quotes;
+            return $movie;
+        });
+        return response()->json($modifiedCollection);
     }
+
     public function deleteMovie(Request $request)
     {
         $movie = Movie::where('id', $request['movieId'])->first();
@@ -47,9 +62,9 @@ class MovieController extends Controller
         $image = request()->file('image');
         if ($image) {
             $path = $image->store('movie');
-            $image = "http://127.0.0.1:8000/storage/" . $path;
+            $image =  $path;
         } else {
-            $image = $request['image'];
+            $image = Str::remove(env('STORAGE_PATH'), $request['image']);
         }
         $movie = Movie::where('id', $request['movieId'])->first();
 
@@ -65,7 +80,6 @@ class MovieController extends Controller
 
         return response()->json([
             'message' => 'Movie updates successfully',
-            'image' => $image
         ]);
     }
 
