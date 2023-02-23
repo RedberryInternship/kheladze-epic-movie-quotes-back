@@ -31,12 +31,18 @@ class MovieController extends Controller
 
     public function allMovies()
     {
-        $moviesWithQuotes = Movie::with('quotes')->get();
+        $moviesWithQuotes = Movie::with('quotes.comments.user', 'quotes.likes')->get();
         $modifiedCollection = $moviesWithQuotes->map(function ($movie) {
             $movie->image = Storage::url($movie->image);
 
             $quotes = $movie->quotes->map(function ($quote) {
-                $quote->image = Storage::url($quote->image);;
+                $quote->image = Storage::url($quote->image);
+                $quote->comments->map(function ($comment) {
+                    if (strpos($comment->user->image, 'storage') == false) {
+                        $comment->user->image = Storage::url($comment->user->image);
+                    }
+                    return $comment;
+                });
                 return $quote;
             });
 

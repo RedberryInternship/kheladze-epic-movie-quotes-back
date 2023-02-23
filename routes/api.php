@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/google-login', [UserController::class, 'authGoogle']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify/{token}', [AuthController::class, 'verifyAccount'])->name('email.verify');
 
@@ -40,6 +42,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/quote/create', [QuoteController::class, 'createQuote']);
     Route::post('/quote/update', [QuoteController::class, 'updateQuote']);
     Route::post('/quote/delete', [QuoteController::class, 'deleteQuote']);
+    Route::get('/quote', [QuoteController::class, 'allQuotes']);
+    Route::post('/comment/add', [NotificationController::class, 'addComment']);
+    Route::post('/like/add', [NotificationController::class, 'like']);
+    Route::post('/like/remove', [NotificationController::class, 'unLike']);
+    Route::post('/notification', [NotificationController::class, 'markAsRead']);
+    Route::post('/notification/read', [NotificationController::class, 'readNotification']);
 });
 
 Route::get('/google/auth', [AuthController::class, 'redirectToGoogle']);
