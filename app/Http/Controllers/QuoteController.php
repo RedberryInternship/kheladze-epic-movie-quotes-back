@@ -9,6 +9,81 @@ use Illuminate\Support\Str;
 
 class QuoteController extends Controller
 {
+    public function allQuotes(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perPage = 3;
+
+        $searchTerm = $request->input('search');
+
+        if ($searchTerm && Str::length($searchTerm) > 1) {
+            $quotesWithMovies = Quote::with('movies.users', 'comments.user', 'likes')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $quotesWithMovies = Quote::with('movies.users', 'comments.user', 'likes')
+                ->orderBy('created_at', 'desc')
+                ->skip(($page - 1) * $perPage)
+                ->take($perPage)
+                ->get();
+        }
+
+
+        $modifiedCollection = $quotesWithMovies->map(function ($quote) use ($searchTerm) {
+            $quote_image = $quote->image;
+
+            if (strpos($quote_image, 'storage') == false) {
+                $quote_image = Storage::url($quote->image);
+            }
+            $quote->image = $quote_image;
+
+            if ($quote->movies) {
+                $movie_image = $quote->movies->image;
+                if (strpos($movie_image, 'storage') == false) {
+                    $movie_image = Storage::url($quote->movies->image);
+                }
+                $quote->movies->image = $movie_image;
+                if ($quote->movies->users) {
+                    $user_image = $quote->movies->users->image;
+                    if (strpos($user_image, 'storage') == false) {
+                        $user_image = Storage::url($quote->movies->users->image);
+                    }
+                    $quote->movies->users->image = $user_image;
+                }
+            }
+
+            $quote->comments->map(function ($comment) {
+                if ($comment->user) {
+                    if (strpos($comment->user->image, 'storage') == false) {
+                        $comment->user->image = Storage::url($comment->user->image);
+                    }
+                }
+                return $comment;
+            });
+
+            return $quote;
+        });
+
+        if ($searchTerm && Str::length($searchTerm) > 1) {
+            $searchedCollection = $modifiedCollection->filter(function ($quote) use ($searchTerm) {
+                if (Str::contains($searchTerm, '@')) {
+                    $movieSearchTerm = substr($searchTerm, 1);
+                    if (Str::contains($quote->movies->name, $movieSearchTerm)) {
+                        return $quote;
+                    }
+                } elseif (Str::contains($searchTerm, '#')) {
+                    $quoteSearchTerm = substr($searchTerm, 1);
+                    if (Str::contains($quote->quote, $quoteSearchTerm)) {
+                        return $quote;
+                    }
+                }
+            });
+            $numericArray = $searchedCollection->values()->all();
+            return response()->json($numericArray);
+        }
+        return response()->json($modifiedCollection);
+    }
+
     public function createQuote(Request $request)
     {
         $path = request()->file('image')->store('quotes');

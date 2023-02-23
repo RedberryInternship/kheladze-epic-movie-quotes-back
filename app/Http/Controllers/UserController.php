@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Email;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -75,5 +76,13 @@ class UserController extends Controller
         $user->save();
 
         return $user;
+    }
+
+    public function authGoogle(Request $request)
+    {
+        $user = User::where('id', $request['id'])->first();
+        request()->session()->regenerate();
+        Auth::login($user);
+        return response(['user' => $user]);
     }
 }

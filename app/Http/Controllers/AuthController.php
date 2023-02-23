@@ -6,7 +6,7 @@ use App\Http\Requests\StoreLoginRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\Email;
 use App\Models\User;
-
+use GuzzleHttp\Psr7\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Http;
+
 
 
 class AuthController extends Controller
@@ -59,9 +61,15 @@ class AuthController extends Controller
     public function me()
     {
         $user = Auth::user();
-        $withEmail = User::where('id', $user->id)->with(['emails'])->first();
+        $withEmail = User::where('id', $user->id)->with(['emails', 'notifications.writer'])->first();
         $withEmail->image = Storage::url($withEmail->image);
-        return response(['user' => $withEmail]);
+        $withEmail->notifications->map(function ($notification) {
+            if (strpos($notification->writer->image, 'storage') == false) {
+                $notification->writer->image = Storage::url($notification->writer->image);
+            }
+            return $notification;
+        });
+        return response(['user' => $withEmail, 'image' => Storage::url($withEmail->image)]);
     }
 
     public function register(StoreUserRequest $request)
@@ -70,8 +78,10 @@ class AuthController extends Controller
         $token = Str::random(64);
         $user = User::create([
             "name" => $credentials["name"],
-            'password' => bcrypt($credentials["password"])
+            'password' => bcrypt($credentials["password"]),
         ]);
+        $user->image = 'users/person.png';
+        $user->save();
 
         $email = Email::create([
             "email" => $credentials["email"],
@@ -125,28 +135,33 @@ class AuthController extends Controller
         if (!$user) {
             $emailAlreadyExists = Email::where('email', $google_user->getEmail())->first();
             if ($emailAlreadyExists) {
-                return response()->json([
-                    'message' => "email already exists",
-                    'code' => 422,
-                ]);
+                return redirect(env('GOOGLE_REDIRECT_EMAIL_EXISTS'));
             }
             $new_user = User::create([
                 "name" => $google_user->getName(),
-                'google_id' => $google_user->getId()
+                'google_id' => $google_user->getId(),
             ]);
+            $new_user->image = 'users/person.png';
+            $new_user->save();
             $email = Email::create([
                 "email" => $google_user->getEmail(),
                 'user_id' => $new_user->id,
             ]);
+            $email->email_verified_at = now();
+            $email->save();
 
-            request()->session()->regenerate();
+            $query = http_build_query(['googleuser' => $new_user->id]);
+            $url = env('GOOGLE_REDIRECT_AUTH') . '?' . $query;
+
             Auth::login($new_user);
-            return redirect(env('FRONTEND_URL'));
+            return redirect($url);
         } else {
 
-            request()->session()->regenerate();
+            $query = http_build_query(['googleuser' => $user->id]);
+            $url = env('GOOGLE_REDIRECT_AUTH') . '?' . $query;
+
             Auth::login($user);
-            return redirect(env('FRONTEND_URL'));
+            return redirect($url);
         }
         try {
         } catch (\Throwable $th) {
