@@ -6,7 +6,6 @@ use App\Http\Requests\StoreLoginRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\Email;
 use App\Models\User;
-use GuzzleHttp\Psr7\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

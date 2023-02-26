@@ -5,8 +5,7 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\UserController;
-use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,5 +49,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/notification/read', [NotificationController::class, 'readNotification']);
 });
 
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 Route::get('/google/auth', [AuthController::class, 'redirectToGoogle']);
 Route::get('/google/callback', [AuthController::class, 'handleGoogleCallback']);
