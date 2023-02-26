@@ -34,7 +34,6 @@ class NotificationCreate implements ShouldBroadcast
      */
     public function broadcastOn(): Channel
     {
-        $notificationRecieverId = Notification::latest()->first()->user_id;
-        return new PrivateChannel('notification.' . $notificationRecieverId);
+        return new PrivateChannel('notification.' . $this->notification->user_id);
     }
 }
