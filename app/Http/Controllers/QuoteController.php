@@ -103,7 +103,7 @@ class QuoteController extends Controller
             $path = $image->store('quote');
             $image = $path;
         } else {
-            $image = Str::remove(env('STORAGE_PATH'), $request['image']);
+            $image = Str::remove(Storage::url(''), $request['image']);
         }
         $quote = Quote::where('id', $request['quoteId'])->first();
 
@@ -114,7 +114,6 @@ class QuoteController extends Controller
 
         return response()->json([
             'message' => 'Quote updates successfully',
-            'quote' => $quote
         ]);
     }
 

@@ -5,6 +5,7 @@ return [
     'failed' => 'These credentials do not match our records.',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-    'email' => 'Must verify email'
+    'email' => 'Must verify email',
+    'google_user' => 'Cannot reset password to google users'
 
 ];
