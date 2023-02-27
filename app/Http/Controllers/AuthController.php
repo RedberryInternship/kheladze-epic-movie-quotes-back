@@ -59,14 +59,14 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $withEmail = User::where('id', $user->id)->with(['emails', 'notifications.writer'])->first();
-        $withEmail->image = Storage::url($withEmail->image);
+        $withEmail->image = env("STORAGE_PATH") . ($withEmail->image);
         $withEmail->notifications->map(function ($notification) {
             if (strpos($notification->writer->image, 'storage') == false) {
-                $notification->writer->image = Storage::url($notification->writer->image);
+                $notification->writer->image = env("STORAGE_PATH") . ($notification->writer->image);
             }
             return $notification;
         });
-        return response(['user' => $withEmail, 'image' => Storage::url($withEmail->image)]);
+        return response(['user' => $withEmail, 'image' => env("STORAGE_PATH") . ($withEmail->image)]);
     }
 
     public function register(StoreUserRequest $request)
@@ -77,8 +77,6 @@ class AuthController extends Controller
             "name" => $credentials["name"],
             'password' => bcrypt($credentials["password"]),
         ]);
-        $user->image = 'users/person.png';
-        $user->save();
 
         $email = Email::create([
             "email" => $credentials["email"],
@@ -141,8 +139,7 @@ class AuthController extends Controller
                 "name" => $google_user->getName(),
                 'google_id' => $google_user->getId(),
             ]);
-            $new_user->image = 'users/person.png';
-            $new_user->save();
+
             $email = Email::create([
                 "email" => $google_user->getEmail(),
                 'user_id' => $new_user->id,

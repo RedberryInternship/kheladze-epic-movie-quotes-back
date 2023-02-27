@@ -33,13 +33,13 @@ class MovieController extends Controller
     {
         $moviesWithQuotes = Movie::with('quotes.comments.user', 'quotes.likes')->get();
         $modifiedCollection = $moviesWithQuotes->map(function ($movie) {
-            $movie->image = Storage::url($movie->image);
+            $movie->image = env("STORAGE_PATH") . ($movie->image);
 
             $quotes = $movie->quotes->map(function ($quote) {
-                $quote->image = Storage::url($quote->image);
+                $quote->image = env("STORAGE_PATH") . ($quote->image);
                 $quote->comments->map(function ($comment) {
                     if (strpos($comment->user->image, 'storage') == false) {
-                        $comment->user->image = Storage::url($comment->user->image);
+                        $comment->user->image = env("STORAGE_PATH") . ($comment->user->image);
                     }
                     return $comment;
                 });
@@ -70,7 +70,7 @@ class MovieController extends Controller
             $path = $image->store('movie');
             $image =  $path;
         } else {
-            $image = Str::remove(Storage::url(''), $request['image']);
+            $image = Str::remove(env("STORAGE_PATH"), $request['image']);
         }
         $movie = Movie::where('id', $request['movieId'])->first();
 
