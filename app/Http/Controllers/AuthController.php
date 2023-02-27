@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Http;
-
 
 
 class AuthController extends Controller
@@ -117,8 +115,9 @@ class AuthController extends Controller
             $email->email_verified_at = now();
             $email->save();
         }
-
-        return redirect(env('MAIL_TO_URL'));
+        $query = http_build_query(['account_activated' => 1]);
+        $url = env('FRONTEND_URL') . '?' . $query;
+        return redirect($url);
     }
 
     public function redirectToGoogle()
@@ -134,7 +133,9 @@ class AuthController extends Controller
         if (!$user) {
             $emailAlreadyExists = Email::where('email', $google_user->getEmail())->first();
             if ($emailAlreadyExists) {
-                return redirect(env('GOOGLE_REDIRECT_EMAIL_EXISTS'));
+                $query = http_build_query(['email' => 'email_already_exists']);
+                $url = env('FRONTEND_URL') . '?' . $query;
+                return redirect($url);
             }
             $new_user = User::create([
                 "name" => $google_user->getName(),
@@ -150,14 +151,13 @@ class AuthController extends Controller
             $email->save();
 
             $query = http_build_query(['googleuser' => $new_user->id]);
-            $url = env('GOOGLE_REDIRECT_AUTH') . '?' . $query;
+            $url = env('FRONTEND_URL') . '?' . $query;
 
             Auth::login($new_user);
             return redirect($url);
         } else {
-
             $query = http_build_query(['googleuser' => $user->id]);
-            $url = env('GOOGLE_REDIRECT_AUTH') . '?' . $query;
+            $url = env('FRONTEND_URL') . '?' . $query;
 
             Auth::login($user);
             return redirect($url);

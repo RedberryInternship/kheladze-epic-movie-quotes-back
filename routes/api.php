@@ -23,6 +23,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/google-login', [UserController::class, 'authGoogle']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify/{token}', [AuthController::class, 'verifyAccount'])->name('email.verify');
+Route::post('/send/instructions', [UserController::class, 'sendInstructions']);
+Route::post('/password/reset', [UserController::class, 'resetPassword']);
+Route::get('/reset-password/{token}', [UserController::class, 'redirectToReset'])->name('password.reset');
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);

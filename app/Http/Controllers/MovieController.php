@@ -70,7 +70,7 @@ class MovieController extends Controller
             $path = $image->store('movie');
             $image =  $path;
         } else {
-            $image = Str::remove(env('STORAGE_PATH'), $request['image']);
+            $image = Str::remove(Storage::url(''), $request['image']);
         }
         $movie = Movie::where('id', $request['movieId'])->first();
 
