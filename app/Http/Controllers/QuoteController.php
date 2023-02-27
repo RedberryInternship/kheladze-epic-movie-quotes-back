@@ -33,20 +33,20 @@ class QuoteController extends Controller
             $quote_image = $quote->image;
 
             if (strpos($quote_image, 'storage') == false) {
-                $quote_image = Storage::url($quote->image);
+                $quote_image = env("STORAGE_PATH") . ($quote->image);
             }
             $quote->image = $quote_image;
 
             if ($quote->movies) {
                 $movie_image = $quote->movies->image;
                 if (strpos($movie_image, 'storage') == false) {
-                    $movie_image = Storage::url($quote->movies->image);
+                    $movie_image = env("STORAGE_PATH") . ($quote->movies->image);
                 }
                 $quote->movies->image = $movie_image;
                 if ($quote->movies->users) {
                     $user_image = $quote->movies->users->image;
                     if (strpos($user_image, 'storage') == false) {
-                        $user_image = Storage::url($quote->movies->users->image);
+                        $user_image = env("STORAGE_PATH") . ($quote->movies->users->image);
                     }
                     $quote->movies->users->image = $user_image;
                 }
@@ -55,7 +55,7 @@ class QuoteController extends Controller
             $quote->comments->map(function ($comment) {
                 if ($comment->user) {
                     if (strpos($comment->user->image, 'storage') == false) {
-                        $comment->user->image = Storage::url($comment->user->image);
+                        $comment->user->image = env("STORAGE_PATH") . ($comment->user->image);
                     }
                 }
                 return $comment;
@@ -103,7 +103,7 @@ class QuoteController extends Controller
             $path = $image->store('quote');
             $image = $path;
         } else {
-            $image = Str::remove(Storage::url(''), $request['image']);
+            $image = Str::remove(env("STORAGE_PATH"), $request['image']);
         }
         $quote = Quote::where('id', $request['quoteId'])->first();
 
