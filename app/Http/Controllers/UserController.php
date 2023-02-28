@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePasswordResetRequest;
 use App\Models\Email;
 use App\Models\User;
 use Carbon\Carbon;
@@ -123,12 +124,9 @@ class UserController extends Controller
         $url = env('FRONTEND_URL') . '?' . $query;
         return redirect($url);
     }
-    public function resetPassword(Request $request)
+    public function resetPassword(StorePasswordResetRequest $passwordRequest)
     {
-        $request->validate([
-            'reset_token'    => 'required',
-            'password' => 'required|min:3|confirmed',
-        ]);
+        $request = $passwordRequest->validated();
 
         $updatePassword = DB::table('password_resets')
             ->where([
@@ -137,7 +135,7 @@ class UserController extends Controller
             ->first();
 
         $user = User::where('name', $updatePassword->email)
-            ->update(['password' => Hash::make($request->password)]);
+            ->update(['password' => Hash::make($request['password'])]);
 
         DB::table('password_resets')->where(['email' => $updatePassword->email])->delete();
 
