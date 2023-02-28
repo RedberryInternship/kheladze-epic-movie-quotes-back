@@ -44,7 +44,7 @@ class QuoteController extends Controller
                 $quote->movies->image = $movie_image;
                 if ($quote->movies->users) {
                     $user_image = $quote->movies->users->image;
-                    if (strpos($user_image, 'storage') == false) {
+                    if (strpos($user_image, 'storage') == false && $quote->movies->users->google_id == null) {
                         $user_image = env("STORAGE_PATH") . ($quote->movies->users->image);
                     }
                     $quote->movies->users->image = $user_image;
@@ -53,7 +53,7 @@ class QuoteController extends Controller
 
             $quote->comments->map(function ($comment) {
                 if ($comment->user) {
-                    if (strpos($comment->user->image, 'storage') == false) {
+                    if (strpos($comment->user->image, 'storage') == false && $comment->user->google_id == null) {
                         $comment->user->image = env("STORAGE_PATH") . ($comment->user->image);
                     }
                 }
