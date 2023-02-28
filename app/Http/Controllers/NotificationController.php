@@ -64,9 +64,9 @@ class NotificationController extends Controller
             ->delete();
         return response()->json(['message' => 'Quote unliked Successfully']);
     }
-    public function markAsRead()
+    public function markAsRead(Request $request)
     {
-        $notifications = Notification::all();
+        $notifications = Notification::where("user_id", $request[0])->get();
 
         foreach ($notifications as $notification) {
             $notification->update(['is_new' => false]);
@@ -77,10 +77,7 @@ class NotificationController extends Controller
 
     public function readNotification(Request $request)
     {
-
-        $notification = Notification::where('id', $request['id'])->first();
-        $notification->is_new = false;
-        $notification->save();
+        Notification::find($request['id'])->update(['is_new' => false]);
 
         return 'Notification Status updated successfully.';
     }
