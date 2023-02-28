@@ -38,7 +38,7 @@ class MovieController extends Controller
             $quotes = $movie->quotes->map(function ($quote) {
                 $quote->image = env("STORAGE_PATH") . ($quote->image);
                 $quote->comments->map(function ($comment) {
-                    if (strpos($comment->user->image, 'storage') == false) {
+                    if (strpos($comment->user->image, 'storage') == false && $comment->user->google_id == null) {
                         $comment->user->image = env("STORAGE_PATH") . ($comment->user->image);
                     }
                     return $comment;

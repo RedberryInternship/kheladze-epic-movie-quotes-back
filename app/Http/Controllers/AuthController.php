@@ -59,9 +59,13 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $withEmail = User::where('id', $user->id)->with(['emails', 'notifications.writer'])->first();
-        $withEmail->image = env("STORAGE_PATH") . ($withEmail->image);
+
+        if (!$withEmail->google_id) {
+            $withEmail->image = env("STORAGE_PATH") . ($withEmail->image);
+        }
+
         $withEmail->notifications->map(function ($notification) {
-            if (strpos($notification->writer->image, 'storage') == false) {
+            if (strpos($notification->writer->image, 'storage') == false && $notification->writer->google_id == null) {
                 $notification->writer->image = env("STORAGE_PATH") . ($notification->writer->image);
             }
             return $notification;
@@ -113,8 +117,13 @@ class AuthController extends Controller
             $email->email_verified_at = now();
             $email->save();
         }
-        $query = http_build_query(['account_activated' => 1]);
-        $url = env('FRONTEND_URL') . '?' . $query;
+        if ($email->primary) {
+            $query = http_build_query(['account_activated' => 1]);
+            $url = env('FRONTEND_URL') . '?' . $query;
+        } else {
+            $url = env('FRONTEND_URL') . 'profile';
+        }
+
         return redirect($url);
     }
 
@@ -140,6 +149,8 @@ class AuthController extends Controller
                 'google_id' => $google_user->getId(),
             ]);
 
+            $new_user->image = $google_user->getAvatar();
+            $new_user->save();
             $email = Email::create([
                 "email" => $google_user->getEmail(),
                 'user_id' => $new_user->id,
